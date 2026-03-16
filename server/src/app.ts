@@ -15,6 +15,7 @@ import { activityRoutes } from "./routes/activity.js";
 import { dashboardRoutes } from "./routes/dashboard.js";
 import { registrationRoutes } from "./routes/registration.js";
 import { agentPollRoutes } from "./routes/agent-poll.js";
+import { webhookRoutes } from "./routes/webhooks.js";
 
 export function createApp(db: Db, opts: { deploymentMode: DeploymentMode }) {
   const app = express();
@@ -36,6 +37,7 @@ export function createApp(db: Db, opts: { deploymentMode: DeploymentMode }) {
   api.use(dashboardRoutes(db));
   api.use(registrationRoutes(db));
   api.use(agentPollRoutes(db));
+  api.use(webhookRoutes(db));
 
   app.use("/api", api);
   app.use("/api", (_req, res) => {

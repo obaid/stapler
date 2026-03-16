@@ -8,6 +8,8 @@ import { createApp } from "./app.js";
 import { loadConfig } from "./config.js";
 import { logger } from "./middleware/logger.js";
 import { setupLiveEventsWebSocketServer } from "./realtime/live-events-ws.js";
+import { webhookDispatcher } from "./services/webhook-dispatcher.js";
+import { heartbeatService } from "./services/heartbeat.js";
 
 const LOCAL_BOARD_USER_ID = "local-board";
 const LOCAL_BOARD_USER_EMAIL = "local@stapler.local";
@@ -90,6 +92,21 @@ async function startServer() {
   }
 
   setupLiveEventsWebSocketServer(server, { deploymentMode: config.deploymentMode });
+
+  // Start webhook retry processor
+  const webhooks = webhookDispatcher(db as any);
+  webhooks.startRetryProcessor();
+
+  // Start heartbeat reaper
+  const hb = heartbeatService(db as any);
+  void hb.reapOrphanedRuns().catch((err) => {
+    logger.error({ err }, "Startup heartbeat reap failed");
+  });
+  setInterval(() => {
+    void hb.reapOrphanedRuns({ staleThresholdMs: 5 * 60 * 1000 }).catch((err) => {
+      logger.error({ err }, "Periodic heartbeat reap failed");
+    });
+  }, 60_000);
 
   process.env.STAPLER_LISTEN_HOST = config.host;
   process.env.STAPLER_LISTEN_PORT = String(listenPort);
