@@ -1,0 +1,22 @@
+{
+  "name": "stapler",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "pnpm --filter @stapler/server dev",
+    "build": "pnpm -r build",
+    "typecheck": "pnpm -r typecheck",
+    "test": "vitest",
+    "test:run": "vitest run",
+    "db:generate": "pnpm --filter @stapler/db generate",
+    "db:migrate": "pnpm --filter @stapler/db migrate"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.3",
+    "vitest": "^3.0.5"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "packageManager": "pnpm@9.15.4"
+}
