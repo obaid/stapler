@@ -27,15 +27,18 @@ export function CompanyProvider({ children }: { children: ReactNode }) {
     if (list.length > 0 && !companyId) {
       setCompanyId(list[0].id);
     }
+    return list;
   };
 
   useEffect(() => {
-    refresh().catch(() => {
-      // Auto-create a default company if none exists
-      companiesApi
-        .create({ name: "Default", description: "Auto-created workspace" })
-        .then(() => refresh());
-    });
+    refresh()
+      .then(async (list) => {
+        if (list.length === 0) {
+          await companiesApi.create({ name: "Default", description: "Auto-created workspace" });
+          await refresh();
+        }
+      })
+      .catch(console.error);
   }, []);
 
   const company = companies.find((c) => c.id === companyId) ?? null;
